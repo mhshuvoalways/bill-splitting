@@ -1,13 +1,18 @@
-import { Camera, X } from "lucide-react";
+import { Camera, Trash, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import Button1 from "../components/common/Button1";
+import Model from "../components/common/Model";
+import ManualInput from "../components/receipt/ManualInput";
 
 const UploadReceipt = () => {
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
+  const [items, setItems] = useState([]);
 
   const handleFileUploadClick = () => {
     if (fileInputRef.current) {
@@ -69,9 +74,13 @@ const UploadReceipt = () => {
       tracks.forEach((track) => track.stop());
     }
     setIsCameraOpen(false);
+    setIsModalOpen(false);
   };
 
-  console.log(capturedImage);
+  const deleteHandler = (uid) => {
+    const temp = [...items];
+    setItems(temp.filter((el) => el.uid !== uid));
+  };
 
   return (
     <div>
@@ -82,10 +91,10 @@ const UploadReceipt = () => {
             <img
               src={capturedImage}
               alt="Captured"
-              className="w-full max-w-md rounded-md"
+              className="w-full max-w-md max-h-96 rounded-md"
             />
             <X
-              className="cursor-pointer absolute right-1 top-1 z-10"
+              className="cursor-pointer absolute -right-6 top-0 z-10"
               onClick={() => setCapturedImage(null)}
             />
           </div>
@@ -116,22 +125,26 @@ const UploadReceipt = () => {
           <Button1
             buttonLabel={"Manual input"}
             className={"block mx-auto bg-gray-300 hover:bg-gray-400"}
-            onClick={() =>
-              alert("Manual input form functionality will go here!")
-            }
+            onClick={() => setIsModalOpen(!isModalOpen)}
           />
         </div>
-        <Button1 buttonLabel={"Next"} className={"block mx-auto mt-20"} />
+        <Link to={"/split"}>
+          <Button1 buttonLabel={"Next"} className={"block mx-auto mt-20"} />
+        </Link>
         {isCameraOpen && (
-          <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex flex-col items-center justify-center z-50">
+          <Model
+            isOpen={isCameraOpen}
+            onClose={handleCloseCamera}
+            title={"Take a photo"}
+          >
             <video
               ref={videoRef}
-              className="w-full max-w-md bg-black rounded-md"
+              className="w-full bg-black rounded-md"
             ></video>
             <div className="mt-2 space-y-2">
               <Button1
                 buttonLabel={"Take Photo"}
-                className={"bg-green-500 hover:bg-green-600"}
+                className={"bg-green-400 hover:bg-green-500"}
                 onClick={handleTakePhoto}
               />
               <Button1
@@ -140,8 +153,39 @@ const UploadReceipt = () => {
                 onClick={handleCloseCamera}
               />
             </div>
-          </div>
+          </Model>
         )}
+        <Model
+          isOpen={isModalOpen}
+          onClose={handleCloseCamera}
+          title={"Upload Manual Input"}
+        >
+          <ManualInput items={items} setItems={setItems} />
+          {items.length ? (
+            <table className="w-full mt-5 text-start">
+              <tr>
+                <th className="text-start">Item</th>
+                <th className="text-start">Cost</th>
+                <th className="text-start">UID</th>
+                <th className="text-start">Action</th>
+              </tr>
+              {items.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.item}</td>
+                  <td>{item.cost}</td>
+                  <td>{item.uid}</td>
+                  <td>
+                    <Trash
+                      className="cursor-pointer"
+                      onClick={() => deleteHandler(item.uid)}
+                      size={16}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </table>
+          ) : null}
+        </Model>
         <canvas ref={canvasRef} className="hidden"></canvas>
       </div>
     </div>

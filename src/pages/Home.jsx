@@ -25,7 +25,7 @@ const Home = () => {
           <Link to={`/generate-link/${value}`}>
             <Button1
               buttonLabel={"Next"}
-              className={"bg-green-500 hover:bg-green-600 text-white mt-20"}
+              className={"bg-green-400 hover:bg-green-500 text-white mt-20"}
             />
           </Link>
         ) : (

@@ -3,7 +3,7 @@ import Button1 from "../components/common/Button1";
 
 const Home = () => {
   const params = useParams();
-  const link = `${import.meta.env.VITE_BASE_URL}/generate-link/${params.id}`;
+  const link = `${import.meta.env.VITE_BASE_URL}/share/${params.id}`;
 
   const handleCopy = () => {
     navigator.clipboard
