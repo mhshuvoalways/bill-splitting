@@ -1,6 +1,6 @@
-import { Camera, Trash, X } from "lucide-react";
+import { Camera, Trash } from "lucide-react";
 import { useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button1 from "../components/common/Button1";
 import Model from "../components/common/Model";
 import ManualInput from "../components/receipt/ManualInput";
@@ -14,6 +14,8 @@ const UploadReceipt = () => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [items, setItems] = useState([]);
 
+  const navigate = useNavigate();
+
   const handleFileUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -26,6 +28,7 @@ const UploadReceipt = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setCapturedImage(e.target.result);
+        navigate("/split");
       };
       reader.readAsDataURL(file);
     }
@@ -34,7 +37,9 @@ const UploadReceipt = () => {
   const handleOpenCamera = async () => {
     try {
       setIsCameraOpen(true);
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
@@ -62,6 +67,7 @@ const UploadReceipt = () => {
       if (stream) {
         const tracks = stream.getTracks();
         tracks.forEach((track) => track.stop());
+        navigate("/split");
       }
       setIsCameraOpen(false);
     }
@@ -82,25 +88,13 @@ const UploadReceipt = () => {
     setItems(temp.filter((el) => el.uid !== uid));
   };
 
+  console.log(capturedImage);
+
   return (
     <div>
       <p className="text-2xl">Bill Splitting</p>
       <div className="mt-10">
-        {capturedImage ? (
-          <div className="relative">
-            <img
-              src={capturedImage}
-              alt="Captured"
-              className="w-full max-w-md max-h-96 rounded-md"
-            />
-            <X
-              className="cursor-pointer absolute -right-6 top-0 z-10"
-              onClick={() => setCapturedImage(null)}
-            />
-          </div>
-        ) : (
-          <Camera className="w-full" size={160} />
-        )}
+        <Camera className="w-full" size={160} />
         <div className="space-y-2 mt-5">
           <p>* Upload your receipt</p>
           <div>
